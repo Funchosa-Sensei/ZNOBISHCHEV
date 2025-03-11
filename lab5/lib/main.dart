@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'simple_list.dart';
-import 'infinity_list.dart';
-import 'infinity_math_list.dart';
+import 'components/simple_list.dart';
+import 'components/infinity_list.dart';
+import 'components/infinity_math_list.dart';
 
 void main() {
   runApp(MyApp());
