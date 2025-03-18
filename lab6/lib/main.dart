@@ -28,10 +28,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _formKey = GlobalKey<FormState>();
-
   final TextEditingController _widthController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
-
+  final List<String> _units = ['мм', 'см', 'м'];
+  String _selectedUnit = 'мм';
   String _resultText = '';
 
   @override
@@ -42,13 +42,32 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _calculateArea() {
-    if (_formKey.currentState!.validate()) {
+    bool isFormValid = _formKey.currentState!.validate();
+    if (isFormValid) {
       double width = double.parse(_widthController.text);
       double height = double.parse(_heightController.text);
-      double area = width * height;
+      double convertedWidth = width;
+      double convertedHeight = height;
+
+      if (_selectedUnit == 'см') {
+        convertedWidth = width * 10;
+        convertedHeight = height * 10;
+      } else if (_selectedUnit == 'м') {
+        convertedWidth = width * 1000;
+        convertedHeight = height * 1000;
+      }
+
+      double areaInMm2 = convertedWidth * convertedHeight;
+      double displayedArea = areaInMm2;
+
+      if (_selectedUnit == 'см') {
+        displayedArea = areaInMm2 * 0.01;
+      } else if (_selectedUnit == 'м') {
+        displayedArea = areaInMm2 * 0.000001;
+      }
 
       setState(() {
-        _resultText = 'S = $width * $height = $area (мм2)';
+        _resultText = 'S = $width × $height = $displayedArea ${_selectedUnit}²';
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -75,13 +94,34 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                children: [
+                  const Text('Единицы измерения: '),
+                  DropdownButton<String>(
+                    value: _selectedUnit,
+                    items:
+                        _units.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedUnit = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16.0),
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     width: 120,
                     margin: const EdgeInsets.only(top: 14),
                     child: const Text(
-                      'Ширина (мм):',
+                      'Ширина:',
                       style: TextStyle(fontSize: 16),
                     ),
                   ),
@@ -111,7 +151,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
               const SizedBox(height: 16.0),
-
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -119,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     width: 120,
                     margin: const EdgeInsets.only(top: 14),
                     child: const Text(
-                      'Высота (мм):',
+                      'Высота:',
                       style: TextStyle(fontSize: 16),
                     ),
                   ),
@@ -149,7 +188,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
               const SizedBox(height: 24.0),
-
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -160,7 +198,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text('Вычислить'),
                 ),
               ),
-
               const SizedBox(height: 16.0),
               const Center(
                 child: Text(
@@ -168,7 +205,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
                 ),
               ),
-
               const SizedBox(height: 24.0),
               Text(_resultText, style: const TextStyle(fontSize: 20.0)),
             ],
